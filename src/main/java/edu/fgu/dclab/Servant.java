@@ -3,13 +3,15 @@ package edu.fgu.dclab;
 import java.io.*;
 import java.net.Socket;
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class Servant implements Runnable {
     private ObjectOutputStream out = null;
     private String source = null;
 
     private Socket socket = null;
-
+    private Date    date = new Date();
     private ChatRoom room = null;
 
     public Servant(Socket socket, ChatRoom room) {
@@ -26,6 +28,7 @@ public class Servant implements Runnable {
         }
 
         greet();
+
     }
 
     public void process(Message message) {
@@ -35,7 +38,12 @@ public class Servant implements Runnable {
                 break;
 
             case Message.CHAT:
-                this.write(message);
+              String getMessage= ((ChatMessage)message).MESSAGE;
+                if (getMessage.equals("time?")){
+
+                    this.write((new ChatMessage("現在時間:",MessageFormat.format(date) ));
+                }else {
+                this.write(message);}
                 break;
 
             case Message.LOGIN:
@@ -60,7 +68,9 @@ public class Servant implements Runnable {
 
     private void write(Message message) {
         try {
+
             this.out.writeObject(message);
+
             this.out.flush();
         }
         catch (IOException e) {
@@ -89,6 +99,8 @@ public class Servant implements Runnable {
             )
         ) {
             this.process((Message)in.readObject());
+
+
 
             while ((message = (Message) in.readObject()) != null) {
                 this.room.multicast(message);
